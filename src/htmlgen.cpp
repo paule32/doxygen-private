@@ -1769,7 +1769,7 @@ void HtmlGenerator::writeStartAnnoItem(const QCString &,const QCString &f,
   if (!path.isEmpty()) docify(path);
   QCString fn = f;
   addHtmlExtensionIfMissing(fn);
-  m_t << "<a class=\"el\" href=\"" << fn << "\">";  // paule32: 15.02.2025
+  m_t << "<a class=\"el\" href=" << fn << ">";  // paule32: 15.02.2025
   docify(name);
   m_t << "</a> ";
 }
