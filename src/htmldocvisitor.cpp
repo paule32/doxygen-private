@@ -400,9 +400,9 @@ void HtmlDocVisitor::operator()(const DocURL &u)
   }
   else // web address
   {
-    m_t << "<a href=\"EEEEEE";
+    m_t << "<a href=\"";
     filter(u.url());
-    m_t << "EEEEEE>";
+    m_t << ">";
     filter(u.url());
     m_t << "</a>";
   }
@@ -2184,7 +2184,7 @@ void HtmlDocVisitor::startLink(const QCString &ref,const QCString &file,
   }
   else // local link
   {
-    m_t << "<a class=\"EEel\" ";
+    m_t << "<a class=\"el\" ";
   }
   m_t << "href=\"";
   QCString fn = file;
