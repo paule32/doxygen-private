@@ -1731,7 +1731,7 @@ void HtmlGenerator::startIndexItem(const QCString &ref,const QCString &f)
     }
     else
     {
-      m_t << "<a class=\"el\" ";
+      m_t << "<a class=\"AAel\" ";
     }
     m_t << "href=\"";
     m_t << externalRef(m_relPath,ref,TRUE);
@@ -1769,7 +1769,7 @@ void HtmlGenerator::writeStartAnnoItem(const QCString &,const QCString &f,
   if (!path.isEmpty()) docify(path);
   QCString fn = f;
   addHtmlExtensionIfMissing(fn);
-  m_t << "<a class=\"el\" href=" << fn << ">";  // paule32: 15.02.2025
+  m_t << "<a class=\"BBel\" href=" << fn << ">";  // paule32: 15.02.2025
   docify(name);
   m_t << "</a> ";
 }
@@ -1784,7 +1784,7 @@ void HtmlGenerator::writeObjectLink(const QCString &ref,const QCString &f,
   }
   else
   {
-    m_t << "<a class=\"el\" ";
+    m_t << "<a class=\"CCel\" ";
   }
   m_t << "href=\"";
   QCString fn = f;
@@ -3475,7 +3475,7 @@ void HtmlGenerator::writeInheritedSectionTitle(
   DBG_HTML(m_t << "<!-- writeInheritedSectionTitle -->\n";)
   QCString a = anchor;
   if (!a.isEmpty()) a.prepend("#");
-  QCString classLink = QCString("<a class=\"el\" ");
+  QCString classLink = QCString("<a class=\"LLel\" ");
   if (!ref.isEmpty())
   {
     classLink+= externalLinkTarget();

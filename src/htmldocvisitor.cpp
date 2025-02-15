@@ -400,9 +400,9 @@ void HtmlDocVisitor::operator()(const DocURL &u)
   }
   else // web address
   {
-    m_t << "<a href=\"";
+    m_t << "<a href=\"EEEEEE";
     filter(u.url());
-    m_t << "\">";
+    m_t << "EEEEEE>";
     filter(u.url());
     m_t << "</a>";
   }
@@ -2013,7 +2013,7 @@ void HtmlDocVisitor::operator()(const DocXRefItem &x)
   {
     QCString fn = x.file();
     addHtmlExtensionIfMissing(fn);
-    m_t << "<dl class=\"" << x.key() << "\"><dt><b><a class=\"el\" href=\""
+    m_t << "<dl class=\"" << x.key() << "\"><dt><b><a class=\"RRel\" href=\""
         << x.relPath() << fn
         << "#" << x.anchor() << "\">";
   }
@@ -2184,7 +2184,7 @@ void HtmlDocVisitor::startLink(const QCString &ref,const QCString &file,
   }
   else // local link
   {
-    m_t << "<a class=\"el\" ";
+    m_t << "<a class=\"EEel\" ";
   }
   m_t << "href=\"";
   QCString fn = file;
