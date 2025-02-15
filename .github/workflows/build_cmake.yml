@@ -13,16 +13,12 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - name: "Windows Latest MSVC Debug",
-            os: windows-latest,
-            build_type: "Debug", cc: "cl", cxx: "cl",
-            build_gen: "NMake Makefiles"
-          
-        - name: "Windows Latest MSVC Release",
+        - {
+            name: "Windows Latest MSVC Release",
             os: windows-latest,
             build_type: "Release", cc: "cl", cxx: "cl",
             build_gen: "NMake Makefiles"
-    
+          }
     steps:
     - name: Checkout doxygen
       uses: actions/checkout@v4
