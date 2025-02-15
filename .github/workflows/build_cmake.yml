@@ -80,8 +80,6 @@ jobs:
         win_flex --version;
         echo "=== dot ===";
         dot -V;
-        echo "=== ghostscript ===";
-        gswin64c --version;
       if: matrix.config.os == 'windows-latest'
 
     - name: Configure
