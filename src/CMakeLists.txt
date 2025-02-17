@@ -110,6 +110,8 @@ set(LEX_FILES
     pre
     pycode
     pyscanner
+    pascode
+    passcanner
     scanner
     sqlcode
     vhdlcode

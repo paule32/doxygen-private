@@ -66,8 +66,13 @@
 #include "searchindex_js.h"
 #include "parserintf.h"
 #include "htags.h"
+
 #include "pycode.h"
 #include "pyscanner.h"
+
+#include "pascode.h"
+#include "passcanner.h"
+
 #include "fortrancode.h"
 #include "fortranscanner.h"
 #include "xmlcode.h"
@@ -8354,14 +8359,17 @@ static void computeMemberRelationsForBaseClass(const ClassDef *cd,const BaseClas
                 auto lang     = bmd->getLanguage();
                 auto compType = mbcd->compoundType();
                 if (bmd->virtualness()!=Specifier::Normal ||
-                    lang==SrcLangExt::Python              ||
-                    lang==SrcLangExt::Java                ||
-                    lang==SrcLangExt::PHP                 ||
-                    compType==ClassDef::Interface         ||
-                    compType==ClassDef::Protocol)
+                
+                    lang     == SrcLangExt::Python        ||
+                    lang     == SrcLangExt::Java          ||
+                    lang     == SrcLangExt::PHP           ||
+                    
+                    compType == ClassDef::Interface       ||
+                    compType == ClassDef::Protocol)
                 {
                   const ArgumentList &bmdAl = bmd->argumentList();
                   const ArgumentList &mdAl =  md->argumentList();
+                  
                   //printf(" Base argList='%s'\n Super argList='%s'\n",
                   //        qPrint(argListToString(bmdAl)),
                   //        qPrint(argListToString(mdAl))
@@ -11317,8 +11325,13 @@ void initDoxygen()
                                                          make_parser_factory<FileCodeParser>());
   Doxygen::parserManager->registerParser("c",            make_parser_factory<COutlineParser>(),
                                                          make_parser_factory<CCodeParser>());
+  
   Doxygen::parserManager->registerParser("python",       make_parser_factory<PythonOutlineParser>(),
                                                          make_parser_factory<PythonCodeParser>());
+                                                         
+  Doxygen::parserManager->registerParser("pascal",       make_parser_factory<PascalOutlineParser>(),
+                                                         make_parser_factory<PascalCodeParser>());
+                                                         
   Doxygen::parserManager->registerParser("fortran",      make_parser_factory<FortranOutlineParser>(),
                                                          make_parser_factory<FortranCodeParser>());
   Doxygen::parserManager->registerParser("fortranfree",  make_parser_factory<FortranOutlineParserFree>(),
@@ -12450,12 +12463,14 @@ void parseInput()
       bool generateQhp         = Config_getBool(GENERATE_QHP);
       bool generateTreeView    = Config_getBool(GENERATE_TREEVIEW);
       bool generateDocSet      = Config_getBool(GENERATE_DOCSET);
+      
       if (generateEclipseHelp) Doxygen::indexList->addIndex<EclipseHelp>();
       if (generateHtmlHelp)    Doxygen::indexList->addIndex<HtmlHelp>();
       if (generateQhp)         Doxygen::indexList->addIndex<Qhp>();
       if (generateSitemap)     Doxygen::indexList->addIndex<Sitemap>();
       if (generateTreeView)    Doxygen::indexList->addIndex<FTVHelp>(TRUE);
       if (generateDocSet)      Doxygen::indexList->addIndex<DocSets>();
+      
       Doxygen::indexList->addIndex<Crawlmap>();
       Doxygen::indexList->initialize();
     }
@@ -13118,6 +13133,7 @@ void generateOutput()
   if (generateHtml)
   {
     FTVHelp::generateTreeViewImages();
+    
     copyStyleSheet();
     copyLogo(Config_getString(HTML_OUTPUT));
     copyIcon(Config_getString(HTML_OUTPUT));

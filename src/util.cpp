@@ -5587,6 +5587,8 @@ static std::vector<Lang2ExtMap> g_lang2extMap =
   { "c++",         "c",             SrcLangExt::Cpp,      ".cpp" },
   { "slice",       "c",             SrcLangExt::Slice,    ".ice" },
   { "python",      "python",        SrcLangExt::Python,   ".py"  },
+  { "pascal",      "pascal",        SrcLangExt::Pascal,   ".pas" },
+  { "pascal",      "pascal",        SrcLangExt::Pascal,   ".pp"  },
   { "fortran",     "fortran",       SrcLangExt::Fortran,  ".f"   },
   { "fortranfree", "fortranfree",   SrcLangExt::Fortran,  ".f90" },
   { "fortranfixed", "fortranfixed", SrcLangExt::Fortran,  ".f"   },
@@ -5675,8 +5677,14 @@ void initDefaultExtensionMapping()
   updateLanguageMapping(".m",        "objective-c");
   updateLanguageMapping(".M",        "objective-c");
   updateLanguageMapping(".mm",       "c");  // see bug746361
+  
+  
   updateLanguageMapping(".py",       "python");
   updateLanguageMapping(".pyw",      "python");
+  
+  updateLanguageMapping(".pas",      "pascal");
+  updateLanguageMapping(".pp",       "pascal");
+  
   updateLanguageMapping(".f",        "fortran");
   updateLanguageMapping(".for",      "fortran");
   updateLanguageMapping(".f90",      "fortran");
@@ -6371,6 +6379,7 @@ QCString langToString(SrcLangExt lang)
     case SrcLangExt::Cpp:      return "C++";
     case SrcLangExt::JS:       return "JavaScript";
     case SrcLangExt::Python:   return "Python";
+    case SrcLangExt::Pascal:   return "Pascal";
     case SrcLangExt::Fortran:  return "Fortran";
     case SrcLangExt::VHDL:     return "VHDL";
     case SrcLangExt::XML:      return "XML";
@@ -6385,7 +6394,11 @@ QCString langToString(SrcLangExt lang)
 /** Returns the scope separator to use given the programming language \a lang */
 QCString getLanguageSpecificSeparator(SrcLangExt lang,bool classScope)
 {
-  if (lang==SrcLangExt::Java || lang==SrcLangExt::CSharp || lang==SrcLangExt::VHDL || lang==SrcLangExt::Python)
+  if ( lang == SrcLangExt::Java
+  ||   lang == SrcLangExt::CSharp
+  ||   lang == SrcLangExt::VHDL
+  ||   lang == SrcLangExt::Python
+  ||   lang == SrcLangExt::Pascal)
   {
     return ".";
   }
