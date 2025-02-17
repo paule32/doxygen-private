@@ -5587,8 +5587,13 @@ static std::vector<Lang2ExtMap> g_lang2extMap =
   { "c++",         "c",             SrcLangExt::Cpp,      ".cpp" },
   { "slice",       "c",             SrcLangExt::Slice,    ".ice" },
   { "python",      "python",        SrcLangExt::Python,   ".py"  },
+  
   { "pascal",      "pascal",        SrcLangExt::Pascal,   ".pas" },
   { "pascal",      "pascal",        SrcLangExt::Pascal,   ".pp"  },
+  
+  { "dbase",       "dbase",         SrcLangExt::dBase,    ".prg" },
+  { "dbase",       "dbase",         SrcLangExt::dBase,    ".wfm" },
+  
   { "fortran",     "fortran",       SrcLangExt::Fortran,  ".f"   },
   { "fortranfree", "fortranfree",   SrcLangExt::Fortran,  ".f90" },
   { "fortranfixed", "fortranfixed", SrcLangExt::Fortran,  ".f"   },
@@ -5684,6 +5689,9 @@ void initDefaultExtensionMapping()
   
   updateLanguageMapping(".pas",      "pascal");
   updateLanguageMapping(".pp",       "pascal");
+  
+  updateLanguageMapping(".prg",      "dbase");
+  updateLanguageMapping(".wfm",      "dbase");
   
   updateLanguageMapping(".f",        "fortran");
   updateLanguageMapping(".for",      "fortran");
@@ -6379,7 +6387,10 @@ QCString langToString(SrcLangExt lang)
     case SrcLangExt::Cpp:      return "C++";
     case SrcLangExt::JS:       return "JavaScript";
     case SrcLangExt::Python:   return "Python";
+    
     case SrcLangExt::Pascal:   return "Pascal";
+    case SrcLangExt::dBase:    return "dBase";
+    
     case SrcLangExt::Fortran:  return "Fortran";
     case SrcLangExt::VHDL:     return "VHDL";
     case SrcLangExt::XML:      return "XML";
@@ -6398,7 +6409,9 @@ QCString getLanguageSpecificSeparator(SrcLangExt lang,bool classScope)
   ||   lang == SrcLangExt::CSharp
   ||   lang == SrcLangExt::VHDL
   ||   lang == SrcLangExt::Python
-  ||   lang == SrcLangExt::Pascal)
+  
+  ||   lang == SrcLangExt::Pascal
+  ||   lang == SrcLengExt::dBase)
   {
     return ".";
   }

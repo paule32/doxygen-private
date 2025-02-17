@@ -70,8 +70,12 @@ class Debug
                      Lex_xml           = 0x0000'0400'0000'0000ULL,
                      Lex_xmlcode       = 0x0000'0800'0000'0000ULL,
                      
+                     
                      Lex_pascode       = 0x0000'1600'0000'0000ULL,
-                     Lex_passcanner    = 0x0000'3200'0000'0000ULL
+                     Lex_passcanner    = 0x0000'1602'0000'0000ULL,
+                     Lex_dbcode        = 0x0000'3200'0000'0000ULL,
+                     Lex_dbscanner     = 0x0000'3202'0000'0000ULL,
+                     
                    };
     static void print_(DebugMask mask, int prio, fmt::string_view fmt, fmt::format_args args);
 

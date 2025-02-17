@@ -60,6 +60,7 @@ enum class SrcLangExt
   Lex      = 0x80000,
   
   Pascal   = 0xF0000,
+  dBase    = 0xF0002,
 };
 
 /** Grouping info */

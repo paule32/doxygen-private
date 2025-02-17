@@ -63,12 +63,13 @@ static std::map< std::string, Debug::DebugMask > s_labels =
   { "lex:lexcode",        Debug::Lex_lexcode        },
   { "lex:lexscanner",     Debug::Lex_lexscanner     },
   { "lex:pre",            Debug::Lex_pre            },
-
   { "lex:pycode",         Debug::Lex_pycode         },
   { "lex:pyscanner",      Debug::Lex_pyscanner      },
 
   { "lex:pascode",        Debug::Lex_pascode        },
   { "lex:passcanner",     Debug::Lex_passcanner     },
+  { "lex:dbcode",         Debug::Lex_dbcode         },
+  { "lex:dbscanner",      Debug::Lex_dbscanner      },
 
   { "lex:scanner",        Debug::Lex_scanner        },
   { "lex:sqlcode",        Debug::Lex_sqlcode        },

@@ -14,9 +14,9 @@
  */
 
 %option never-interactive
-%option prefix="passcannerYY"
+%option prefix="dbscannerYY"
 %option reentrant
-%option extra-type="struct passcannerYY_state *"
+%option extra-type="struct dbscannerYY_state *"
 %top{
 #include <stdint.h>
 // forward declare yyscan_t to improve type safety
@@ -39,7 +39,7 @@ typedef yyguts_t *yyscan_t;
 #include <ctype.h>
 #include <string.h>
 
-#include "passcanner.h"
+#include "dbscanner.h"
 #include "entry.h"
 #include "message.h"
 #include "config.h"
@@ -65,7 +65,7 @@ typedef yyguts_t *yyscan_t;
 
 /* ----------------------------------------------------------------- */
 
-struct passcannerYY_state
+struct dbscannerYY_state
 {
   CommentScanner          commentScanner;
   OutlineParserInterface *thisParser = nullptr;
@@ -205,7 +205,7 @@ static void parseMain(yyscan_t yyscanner, const QCString &fileName,const char *f
 
   BEGIN( Search );
 
-  passcannerYYlex(yyscanner);
+  dbscannerYYlex(yyscanner);
   yyextra->lexInit=TRUE;
 
   yyextra->commentScanner.leaveFile(yyextra->fileName,yyextra->yyLineNr);
@@ -234,11 +234,11 @@ static void parsePrototype(yyscan_t yyscanner,const QCString &text)
   // set new string
   yyextra->inputString = text.data();
   yyextra->inputPosition = 0;
-  passcannerYYrestart( nullptr, yyscanner );
+  dbscannerYYrestart( nullptr, yyscanner );
   
   BEGIN( Search );
   
-  passcannerYYlex(yyscanner);
+  dbscannerYYlex(yyscanner);
   yyextra->lexInit=TRUE;
 
   yyextra->current->name = yyextra->current->name.stripWhiteSpace();
@@ -258,50 +258,50 @@ static void parsePrototype(yyscan_t yyscanner,const QCString &text)
 
 //----------------------------------------------------------------------------
 
-struct PascalOutlineParser::Private
+struct dBaseOutlineParser::Private
 {
   yyscan_t yyscanner;
-  passcannerYY_state state;
+  dbscannerYY_state state;
 };
 
-PascalOutlineParser::PascalOutlineParser() : p(std::make_unique<PascalOutlineParser::Private>())
+dBaseOutlineParser::dBaseOutlineParser() : p(std::make_unique<dBaseOutlineParser::Private>())
 {
-  passcannerYYlex_init_extra(&p->state,&p->yyscanner);
+  dbscannerYYlex_init_extra(&p->state,&p->yyscanner);
 #ifdef FLEX_DEBUG
-  passcannerYYset_debug(Debug::isFlagSet(Debug::Lex_passcanner)?1:0,p->yyscanner);
+  dbscannerYYset_debug(Debug::isFlagSet(Debug::Lex_dbscanner)?1:0,p->yyscanner);
 #endif
 }
 
-PascalOutlineParser::~PascalOutlineParser()
+dBaseOutlineParser::~dBaseOutlineParser()
 {
-  passcannerYYlex_destroy(p->yyscanner);
+  dbscannerYYlex_destroy(p->yyscanner);
 }
 
 
-void PascalOutlineParser::parseInput(const QCString &fileName,
+void dBaseOutlineParser::parseInput(const QCString &fileName,
                                      const char *fileBuf,
                                      const std::shared_ptr<Entry> &root,
                                      ClangTUParser * /*clangParser*/)
 {
   struct yyguts_t *yyg = (struct yyguts_t*)p->yyscanner;
   yyextra->thisParser = this;
-  DebugLex debugLex(Debug::Lex_passcanner, __FILE__, qPrint(fileName));
+  DebugLex debugLex(Debug::Lex_dbscanner, __FILE__, qPrint(fileName));
   ::parseMain(p->yyscanner, fileName,fileBuf,root);
 
   // May print the AST for debugging purposes
   // printAST(global_root);
 }
 
-bool PascalOutlineParser::needsPreprocessing(const QCString &) const
+bool dBaseOutlineParser::needsPreprocessing(const QCString &) const
 {
   return FALSE;
 }
 
-void PascalOutlineParser::parsePrototype(const QCString &text)
+void dBaseOutlineParser::parsePrototype(const QCString &text)
 {
   ::parsePrototype(p->yyscanner,text);
 }
 
 //----------------------------------------------------------------------------
 
-#include "passcanner.l.h"
+#include "dbscanner.l.h"

@@ -112,6 +112,8 @@ set(LEX_FILES
     pyscanner
     pascode
     passcanner
+    dbcode
+    dbscanner
     scanner
     sqlcode
     vhdlcode
