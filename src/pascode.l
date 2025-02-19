@@ -148,17 +148,19 @@ IDENTIFIER        ({LETTER}|"_")({LETTER}|{DIGIT}|"_")*
 %option stack
 
 %x Body
-%x Suite
 
 %%
 
-<Body>{IDENTIFIER}                  {
-                                      codify(yyscanner,yytext);
-                                    }
-<Body>{NEWLINE}                     {
-                                      codifyLines(yyscanner,yytext);
-                                    }
-                                    
+<Body>{WS}* {
+    std::cout << "whitespace" <<
+    std::endl;
+}
+<Body>{WS}{IDENTIFIER} {
+    std::cout << "white with ident: " << yytext <<
+    std::endl;
+    
+  codify(yyscanner,yytext);
+}
 %%
 
 //-------------------------------------------------------------------------------
