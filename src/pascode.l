@@ -125,13 +125,19 @@ static inline const char *getLexerFILE() {return __FILE__;}
 
 %}
 
-PAS1CCS  "\(\*"
-PAS1CCE  "\*\)"
-PAS2CCS  "/{"
-PAS2CCE  "*\}"
-PASCPPC  "\/\/"
+PAS1CS            \(\*
+PAS1CE            \*\)
+PAS2CS            \{
+PAS2CE            \}
+PAS3CP            \/\/
 
-WS                [ \t]*
+PASMC1            ({PAS1CS}\$("define"|"if"|"else"|"endif").*{PAS1CE})
+PASMC2            ({PAS2CS}\$("define"|"if"|"else"|"endif").*{PAS2CE})
+PASMC3            ({PAS3CP}\$("define"|"if"|"else"|"endif").*\n$)
+
+PASMC             (PASMC1|PASMC2|PASMC3)
+
+WS                [ \t]*|{PASMC}|(({PAS1CS}.*{PAS1CE})|({PAS2CS}.*{PAS2CE})|{PAS3CP})
 NEWLINE           \n
 
 DIGIT             [0-9]

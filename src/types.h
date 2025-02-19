@@ -59,8 +59,8 @@ enum class SrcLangExt
   Slice    = 0x40000,
   Lex      = 0x80000,
   
-  Pascal   = 0xF0000,
-  dBase    = 0xF0002,
+  Pascal   = 0x100000,
+  dBase    = 0x200000,
 };
 
 /** Grouping info */

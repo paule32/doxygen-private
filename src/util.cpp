@@ -6411,7 +6411,7 @@ QCString getLanguageSpecificSeparator(SrcLangExt lang,bool classScope)
   ||   lang == SrcLangExt::Python
   
   ||   lang == SrcLangExt::Pascal
-  ||   lang == SrcLengExt::dBase)
+  ||   lang == SrcLangExt::dBase)
   {
     return ".";
   }

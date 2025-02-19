@@ -70,8 +70,11 @@
 #include "pycode.h"
 #include "pyscanner.h"
 
-#include "pascode.h"
-#include "passcanner.h"
+# include "pascode.h"
+# include "passcanner.h"
+# include "dbcode.h"
+# include "dbscanner.h"
+
 
 #include "fortrancode.h"
 #include "fortranscanner.h"
@@ -11325,13 +11328,15 @@ void initDoxygen()
                                                          make_parser_factory<FileCodeParser>());
   Doxygen::parserManager->registerParser("c",            make_parser_factory<COutlineParser>(),
                                                          make_parser_factory<CCodeParser>());
-  
   Doxygen::parserManager->registerParser("python",       make_parser_factory<PythonOutlineParser>(),
                                                          make_parser_factory<PythonCodeParser>());
                                                          
   Doxygen::parserManager->registerParser("pascal",       make_parser_factory<PascalOutlineParser>(),
                                                          make_parser_factory<PascalCodeParser>());
-                                                         
+
+  Doxygen::parserManager->registerParser("dbase",        make_parser_factory<dBaseOutlineParser>(),
+                                                         make_parser_factory<dBaseCodeParser>());
+
   Doxygen::parserManager->registerParser("fortran",      make_parser_factory<FortranOutlineParser>(),
                                                          make_parser_factory<FortranCodeParser>());
   Doxygen::parserManager->registerParser("fortranfree",  make_parser_factory<FortranOutlineParserFree>(),
