@@ -132,29 +132,43 @@ static inline const char *getLexerFILE() {return __FILE__;}
 
 %}
 
-PAS1CS              \(\*
-PAS1CE              \*\)
+PAS1CS              "(*"
+PAS1CE              "*)"
 PAS2CS              \{
 PAS2CE              \}
-PAS3CP              \/\/
+PAS3CC              "//"
 
 CDEFINE             "define"
 CIF                 "if"
 CELSE               "else"
 CENDIF              "endif"
 
-PASMC1              ({PAS1CS}\$("define"|"if"|"else"|"endif").*{PAS1CE})
-PASMC2              ({PAS2CS}\$("define"|"if"|"else"|"endif").*{PAS2CE})
-PASMC3              ({PAS3CP}\$("define"|"if"|"else"|"endif").*\n$)
-
-PASMC               (PASMC1|PASMC2|PASMC3)
-
-WS                  [ \t]*|{PASMC}|(({PAS1CS}.*{PAS1CE})|({PAS2CS}.*{PAS2CE})|{PAS3CP})
+WS                  [ \t]
 NEWLINE             \n
 
 DIGIT               [0-9]
 LETTER              [A-Za-z\x80-\xFF]
 IDENTIFIER          ({LETTER}|"_")({LETTER}|{DIGIT}|"_")*
+
+ASSIGN              \:\=
+NOT_EQUAL           \<\>
+
+SEMICOLON           \;
+COMMA               \,
+
+SUB                 \-
+ADD                 \+
+MUL                 \*
+DIV                 \/
+
+LW                  \<
+EQ                  \=
+GT                  \>
+LW_EQ               \<\=
+GT_EQ               \>\=
+
+PAREN_OPEN          \(
+PAREN_CLOSE         \)
 
 A                   [a|A]
 B                   [b|B]
@@ -193,6 +207,7 @@ FUNCTION            ({F}{U}{N}{C}{T}{I}{O}{N})
 BEGIN               ({B}{E}{G}{I}{N})
 END                 ({E}{N}{D})
 RESULT              ({R}{E}{S}{U}{L}{T})
+NIL                 ({N}{I}{L})
 
 IF                  ({I}{F})
 ELSE                ({E}{L}{S}{E})
@@ -226,6 +241,7 @@ RECORD              ({R}{E}{C}{O}{R}{D})
 
 OVERLOAD            ({O}{V}{E}{R}{L}{O}{A}{D})
 OVERRIDE            ({O}{V}{E}{R}{R}{I}{D}{E})
+REINTRODUCE         ({R}{E}{I}{N}{T}{R}{O}{D}{U}{C}{E})
 INHERITED           ({I}{N}{H}{E}{R}{I}{T}{E}{D})
 
 INITIALIZATION      ({I}{N}{I}{T}{I}{A}{L}{I}{Z}{A}{T}{I}{O}{N})
@@ -233,223 +249,277 @@ FINALZATION         ({F}{I}{N}{A}{L}{Z}{A}{T}{I}{O}{N})
 
 %option noyywrap
 
+%x COMMENT
+
 %x Body
+%x BodyModuleIdent
+%x BodyModuleIdentEnd
+
+%x Interface
+%x Implementation
 
 %%
 
-<Body>\n    {
+{NEWLINE}                           {   yyextra->yyLineNr += 1; }
+
+<COMMENT>[^*]*                      ;   // all chars, except: *
+<COMMENT>"*"[^)]                    ;   // * next with no )
+<COMMENT>"*)"                       {
+    BEGIN(Body);                        // switch to mode: INITIAL
+}
+<COMMENT>{NEWLINE}                  {
     yyextra->yyLineNr += 1;
-    std::cerr << "[3] newline       : #10"      <<
-    std::endl;
 }
-<Body>{WS}* {
-    std::cerr << "[1] whitespace    : #32"      <<
+<COMMENT><<EOF>>                    {
+    std::cerr << "comment not terminated." <<
     std::endl;
+    exit(1);
 }
-<Body>{IDENTIFIER} {
-    std::cerr << "[2] ident         : "         << yytext <<
-    std::endl;
+
+<Body>{PROGRAM}|{LIBRARY}|{UNIT}    {
+    std::string ident = std::string(yytext);
+    if (ident == std::string("program")
+    ||  ident == std::string("library")
+    ||  ident == std::string("unit")) {
+        std::cerr
+            << "line: "
+            << yyextra->yyLineNr
+            << ": is a: "
+            << ident
+            << ": ";
+        BEGIN(BodyModuleIdent);
+    }   else {
+        std::cerr
+            << "line: "
+            << yyextra->yyLineNr
+            << ": error: not a comform pascal syntax."
+            <<
+        std::endl;
+        exit(1);
+    }
 }
-<Body>":=" {
-    std::cerr << "[6] assign        : := "      << yytext <<
-    std::endl;
+<Body>"(*"                          {
+    BEGIN(COMMENT); // switch to mode: COMMENT
 }
-<Body>"<>" {
-    std::cerr << "[7] not equal     : <> "      << yytext <<
+<Body>\n                            { yyextra->yyLineNr += 1; }
+<Body>.                             {
+    std::cerr
+        << "line: "
+        << yyextra->yyLineNr
+        << ": unknown character found."
+        <<
     std::endl;
+    exit(1);
 }
-<Body>{NIL} {
-    std::cerr << "[8] null ptr nil  : nil "     << yytext <<
+<Body><<EOF>>                       {
+    std::cerr
+        << "expected: PROGRAM, LIBRARY or UNIT"
+        << "file reached end."
+        <<
     std::endl;
+    exit(1);
 }
-<Body>[\+\-\*\/] {
-    std::cerr << "[4] math symbol   : "         << yytext <<
-    std::endl;
+<BodyModuleIdent>{IDENTIFIER}       {
+    auto buffer = new char[255];
+    strcpy(buffer, yytext);
+    
+    std::cerr << buffer << std::endl;
+    delete [] buffer;
+    
+    BEGIN(BodyModuleIdentEnd);
 }
-<Body>[\;\.] {
-    std::cerr << "[5] end sign      : "         << yytext <<
+<BodyModuleIdent>{WS}*              ;
+<BodyModuleIdent>{NEWLINE}          { yyextra->yyLineNr += 1; }
+<BodyModuleIdent><<EOF>>            {
+    std::cerr << "error: module missing Semicolon (;) at end." <<
     std::endl;
+    exit(1);
 }
-<Body>{BEGIN} {
-    std::cerr << "[10] keyword      : begin"    <<
+<BodyModuleIdentEnd>{SEMICOLON}     { BEGIN(INITIAL); }
+<BodyModuleIdentEnd>{WS}*           ;
+<BodyModuleIdentEnd>{NEWLINE}       { yyextra->yyLineNr += 1; }
+<BodyModuleIdentEnd><<EOF>>         {
+    std::cerr << "error: module missing semicolon (;) at end." <<
     std::endl;
-}
-<Body>{RESULT} {
-    std::cerr << "[11] keyword      : result"   <<
-    std::endl;
-}
-<Body>{END} {
-    std::cerr << "[12] keyword      : end"      <<
-    std::endl;
-}
-<Body>{FOR} {
-    std::cerr << "[13] keyword      : for"      <<
-    std::endl;
-}
-<Body>{IF} {
-    std::cerr << "[14] keyword      : if"       <<
-    std::endl;
-}
-<Body>{ELSE} {
-    std::cerr << "[15] keyword      : else"     <<
-    std::endl;
-}
-<Body>{THEN} {
-    std::cerr << "[16] keyword      : then"     <<
-    std::endl;
+    exit(1);
 }
 
 %%
 
 //----------------------------------------------------------------------------
 
-static int yyread(yyscan_t yyscanner,char *buf,int max_size)
+static int
+yyread(
+    yyscan_t yyscanner,
+    char     *buf,
+    int      max_size)
 {
-  struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  int c=0;
-  const char *p = yyextra->inputString + yyextra->inputPosition;
-  while ( c < max_size && *p ) { *buf++ = *p++; c++; }
-  yyextra->inputPosition+=c;
-  return c;
+    struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
+    int c = 0;
+    
+    const char *p = yyextra->inputString + yyextra->inputPosition;
+    while ( c < max_size && *p ) { *buf++ = *p++; c++; }
+    yyextra->inputPosition+=c;
+    
+    return c;
 }
 
-static void initParser(yyscan_t yyscanner)
+static void
+initParser(
+    yyscan_t yyscanner)
 {
-  struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  yyextra->protection = Protection::Public;
-  yyextra->mtype = MethodTypes::Method;
-  yyextra->isStatic = FALSE;
-  yyextra->virt = Specifier::Normal;
-  yyextra->previous = 0;
-  yyextra->packageCommentAllowed = TRUE;
+    struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
+
+    yyextra->protection   = Protection::Public;
+    yyextra->mtype        = MethodTypes::Method;
+    yyextra->isStatic     = FALSE;
+    yyextra->virt         = Specifier::Normal;
+    yyextra->previous     = 0;
+    yyextra->packageCommentAllowed = TRUE;
 }
 
 //----------------------------------------------------------------------------
 
-static void parseMain(yyscan_t yyscanner, const QCString &fileName,const char *fileBuf,const std::shared_ptr<Entry> &rt)
+static void
+parseMain(
+    yyscan_t yyscanner,
+    const    QCString &fileName,
+    const    char     *fileBuf,
+    const    std::shared_ptr<Entry> &rt)
 {
-  struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  initParser(yyscanner);
+    struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
+    initParser(yyscanner);
 
-  if (fileBuf==nullptr || fileBuf[0]=='\0') return;
+    if (fileBuf == nullptr || fileBuf[0] == '\0') return;
 
-  yyextra->inputString = fileBuf;
-  yyextra->inputPosition = 0;
+    yyextra->inputString   = fileBuf;
+    yyextra->inputPosition = 0;
 
-  yyextra->protection    = Protection::Public;
-  yyextra->mtype         = MethodTypes::Method;
-  yyextra->isStatic      = false;
-  yyextra->virt          = Specifier::Normal;
-  yyextra->current_root  = rt;
-  yyextra->specialBlock  = false;
+    yyextra->protection    = Protection::Public;
+    yyextra->mtype         = MethodTypes::Method;
+    yyextra->isStatic      = false;
+    yyextra->virt          = Specifier::Normal;
+    yyextra->current_root  = rt;
+    yyextra->specialBlock  = false;
 
-  yyextra->yyLineNr      = 1 ;
-  yyextra->fileName      = fileName;
-  yyextra->checkDupEntry = false;
-  yyextra->firstPass     = true;
-  //setContext();
-  
-  std::cerr << "lex file {" << yyextra->fileName << "}..." <<
-  std::endl;
-  BEGIN( Body );
+    yyextra->yyLineNr      = 1 ;
+    yyextra->fileName      = fileName;
+    yyextra->checkDupEntry = false;
+    yyextra->firstPass     = true;
 
-  passcannerYYlex(yyscanner);
-  yyextra->lexInit = TRUE;
+    std::cerr << "lex file {" << yyextra->fileName << "}..." <<
+    std::endl;
+    BEGIN( Body );
+    
 
-  yyextra->commentScanner.leaveFile(yyextra->fileName,yyextra->yyLineNr);
+    passcannerYYlex(yyscanner);
+    yyextra->lexInit = TRUE;
 
-  yyextra->programStr.clear();
-  yyextra->current_root->program.str(std::string());
+    yyextra->commentScanner.leaveFile(yyextra->fileName,yyextra->yyLineNr);
+
+    yyextra->programStr.clear();
+    yyextra->current_root->program.str(std::string());
+    
+    exit(1);
 }
 
-static void parsePrototype(yyscan_t yyscanner,const QCString &text)
+static void
+parsePrototype(
+    yyscan_t yyscanner,
+    const QCString &text)
 {
-  struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
-  //printf("**** parsePrototype(%s) begin\n",qPrint(text));
-  if (text.isEmpty())
-  {
-    warn(yyextra->fileName,yyextra->yyLineNr,"Empty prototype found!");
-    return;
-  }
+    struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
+    //printf("**** parsePrototype(%s) begin\n",qPrint(text));
+    if (text.isEmpty())
+    {
+        warn(yyextra->fileName,yyextra->yyLineNr,"Empty prototype found!");
+        return;
+    }
 
-  // save scanner state
-  YY_BUFFER_STATE orgState = YY_CURRENT_BUFFER;
-  yy_switch_to_buffer(yy_create_buffer(nullptr, YY_BUF_SIZE, yyscanner), yyscanner);
+    // save scanner state
+    YY_BUFFER_STATE orgState = YY_CURRENT_BUFFER;
+    yy_switch_to_buffer(yy_create_buffer(nullptr, YY_BUF_SIZE, yyscanner), yyscanner);
 
-  const char *orgInputString = yyextra->inputString;
-  int orgInputPosition = yyextra->inputPosition;
+    const char *orgInputString = yyextra->inputString;
+    int orgInputPosition = yyextra->inputPosition;
 
-  // set new string
-  yyextra->inputString = text.data();
-  yyextra->inputPosition = 0;
-  passcannerYYrestart( nullptr, yyscanner );
+    // set new string
+    yyextra->inputString = text.data();
+    yyextra->inputPosition = 0;
+    passcannerYYrestart( nullptr, yyscanner );
 
-  std::cerr << "lex proto file {" << yyextra->fileName << "}..." <<
-  std::endl;
-  BEGIN( Body );
-  
-  passcannerYYlex(yyscanner);
-  yyextra->lexInit=TRUE;
+    std::cerr << "lex proto file {" << yyextra->fileName << "}..." <<
+    std::endl;
+    BEGIN( Body );
 
-  yyextra->current->name = yyextra->current->name.stripWhiteSpace();
-  if (yyextra->current->section.isMemberDoc() && yyextra->current->args.isEmpty())
-  {
-    yyextra->current->section = EntryType::makeVariableDoc();
-  }
+    passcannerYYlex(yyscanner);
+    yyextra->lexInit=TRUE;
 
-  // restore original scanner state
+    yyextra->current->name = yyextra->current->name.stripWhiteSpace();
+    if (yyextra->current->section.isMemberDoc() && yyextra->current->args.isEmpty()) {
+        yyextra->current->section = EntryType::makeVariableDoc();
+    }
 
-  yy_delete_buffer(YY_CURRENT_BUFFER, yyscanner);
-  yy_switch_to_buffer(orgState, yyscanner);
+    // restore original scanner state
 
-  yyextra->inputString = orgInputString;
-  yyextra->inputPosition = orgInputPosition;
+    yy_delete_buffer(YY_CURRENT_BUFFER, yyscanner);
+    yy_switch_to_buffer(orgState, yyscanner);
+
+    yyextra->inputString = orgInputString;
+    yyextra->inputPosition = orgInputPosition;
 }
 
 //----------------------------------------------------------------------------
 
 struct PascalOutlineParser::Private
 {
-  yyscan_t yyscanner;
-  passcannerYY_state state;
+    yyscan_t yyscanner;
+    passcannerYY_state state;
 };
 
 PascalOutlineParser::PascalOutlineParser() : p(std::make_unique<PascalOutlineParser::Private>())
 {
-  passcannerYYlex_init_extra(&p->state,&p->yyscanner);
-#ifdef FLEX_DEBUG
-  passcannerYYset_debug(Debug::isFlagSet(Debug::Lex_passcanner)?1:0,p->yyscanner);
-#endif
+    passcannerYYlex_init_extra(&p->state,&p->yyscanner);
+    #ifdef FLEX_DEBUG
+    passcannerYYset_debug(Debug::isFlagSet(Debug::Lex_passcanner)?1:0,p->yyscanner);
+    #endif
 }
 
 PascalOutlineParser::~PascalOutlineParser()
 {
-  passcannerYYlex_destroy(p->yyscanner);
+    passcannerYYlex_destroy(p->yyscanner);
 }
 
 
-void PascalOutlineParser::parseInput(const QCString &fileName,
-                                     const char *fileBuf,
-                                     const std::shared_ptr<Entry> &root,
-                                     ClangTUParser * /*clangParser*/)
+void
+PascalOutlineParser::parseInput(
+    const QCString &fileName,
+    const char *fileBuf,
+    const std::shared_ptr<Entry> &root, ClangTUParser * /*clangParser*/)
 {
-  struct yyguts_t *yyg = (struct yyguts_t*)p->yyscanner;
-  yyextra->thisParser = this;
-  DebugLex debugLex(Debug::Lex_passcanner, __FILE__, qPrint(fileName));
-  ::parseMain(p->yyscanner, fileName,fileBuf,root);
+    struct yyguts_t *yyg = (struct yyguts_t*)p->yyscanner;
+    yyextra->thisParser  = this;
+    
+    DebugLex debugLex(Debug::Lex_passcanner, __FILE__, qPrint(fileName));
+    ::parseMain(p->yyscanner, fileName,fileBuf,root);
 
-  // May print the AST for debugging purposes
-  // printAST(global_root);
+    // May print the AST for debugging purposes
+    // printAST(global_root);
 }
 
-bool PascalOutlineParser::needsPreprocessing(const QCString &) const
+bool
+PascalOutlineParser::needsPreprocessing(
+    const QCString &
+    ) const
 {
-  return FALSE;
+    return FALSE;
 }
 
-void PascalOutlineParser::parsePrototype(const QCString &text)
+void
+PascalOutlineParser::parsePrototype(
+    const QCString &text)
 {
-  ::parsePrototype(p->yyscanner,text);
+    ::parsePrototype(p->yyscanner,text);
 }
 
 //----------------------------------------------------------------------------
