@@ -38,7 +38,7 @@ class TranslatorAdapterBase : public Translator
     virtual QCString updateNeededMessage() override = 0;
 };
 
-class TranslatorAdapter_1_13_0 : public TranslatorAdapterBase
+class TranslatorAdapter_1_13_2 : public TranslatorAdapterBase
 {
   public:
     QCString updateNeededMessage() override
