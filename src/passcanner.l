@@ -54,9 +54,7 @@ typedef yyguts_t *yyscan_t;
 #include "debug.h"
 #include "stringutil.h"
 
-// Toggle for some debugging info
-//#define DBG_CTX(x) fprintf x
-#define DBG_CTX(x) do { } while(0)
+# define DBG_CTX(x) fprintf x
 
 #define YY_NO_INPUT 1
 #define YY_NO_UNISTD_H 1
@@ -134,33 +132,171 @@ static inline const char *getLexerFILE() {return __FILE__;}
 
 %}
 
-PAS1CS            \(\*
-PAS1CE            \*\)
-PAS2CS            \{
-PAS2CE            \}
-PAS3CP            \/\/
+PAS1CS              \(\*
+PAS1CE              \*\)
+PAS2CS              \{
+PAS2CE              \}
+PAS3CP              \/\/
 
-PASMC1            ({PAS1CS}\$("define"|"if"|"else"|"endif").*{PAS1CE})
-PASMC2            ({PAS2CS}\$("define"|"if"|"else"|"endif").*{PAS2CE})
-PASMC3            ({PAS3CP}\$("define"|"if"|"else"|"endif").*\n$)
+CDEFINE             "define"
+CIF                 "if"
+CELSE               "else"
+CENDIF              "endif"
 
-PASMC             (PASMC1|PASMC2|PASMC3)
+PASMC1              ({PAS1CS}\$("define"|"if"|"else"|"endif").*{PAS1CE})
+PASMC2              ({PAS2CS}\$("define"|"if"|"else"|"endif").*{PAS2CE})
+PASMC3              ({PAS3CP}\$("define"|"if"|"else"|"endif").*\n$)
 
-WS                [ \t]*|{PASMC}|(({PAS1CS}.*{PAS1CE})|({PAS2CS}.*{PAS2CE})|{PAS3CP})
-NEWLINE           \n
+PASMC               (PASMC1|PASMC2|PASMC3)
 
-DIGIT             [0-9]
-LETTER            [A-Za-z\x80-\xFF]
-IDENTIFIER        ({LETTER}|"_")({LETTER}|{DIGIT}|"_")*
+WS                  [ \t]*|{PASMC}|(({PAS1CS}.*{PAS1CE})|({PAS2CS}.*{PAS2CE})|{PAS3CP})
+NEWLINE             \n
+
+DIGIT               [0-9]
+LETTER              [A-Za-z\x80-\xFF]
+IDENTIFIER          ({LETTER}|"_")({LETTER}|{DIGIT}|"_")*
+
+A                   [a|A]
+B                   [b|B]
+C                   [c|C]
+D                   [d|D]
+E                   [e|E]
+F                   [f|F]
+G                   [g|G]
+H                   [h|H]
+I                   [i|I]
+J                   [j|J]
+K                   [k|K]
+L                   [l|L]
+M                   [m|M]
+N                   [n|N]
+O                   [o|O]
+P                   [p|P]
+Q                   [q|Q]
+R                   [r|R]
+S                   [s|S]
+T                   [t|T]
+U                   [u|U]
+V                   [v|V]
+W                   [w|W]
+X                   [x|X]
+Y                   [y|Y]
+Z                   [z|Z]
+
+UNIT                ({U}{N}{I}{T})
+LIBRARY             ({L}{I}{B}{R}{A}{R}{Y})
+PROGRAM             ({P}{R}{O}{G}{R}{A}{M})
+
+PROCEDURE           ({P}{R}{O}{C}{E}{D}{U}{R}{E})
+FUNCTION            ({F}{U}{N}{C}{T}{I}{O}{N})
+
+BEGIN               ({B}{E}{G}{I}{N})
+END                 ({E}{N}{D})
+RESULT              ({R}{E}{S}{U}{L}{T})
+
+IF                  ({I}{F})
+ELSE                ({E}{L}{S}{E})
+THEN                ({T}{H}{E}{N})
+
+FOR                 ({F}{O}{R})
+TO                  ({T}{O})
+DOWNTO              ({D}{O}{W}{N}{T}{O})
+
+WHILE               ({W}{H}{I}{L}{E})
+DO                  ({D}{O})
+BREAK               ({B}{R}{E}{A}{K})
+
+REPEAT              ({R}{E}{P}{E}{A}{T})
+UNTIL               ({U}{N}{T}{I}{L})
+
+USES                ({U}{S}{E}{S})
+INTERFACE           ({I}{N}{T}{E}{R}{F}{A}{C}{E})
+IMPLEMENTATION      ({I}{M}{P}{L}{E}{M}{E}{N}{T}{A}{T}{I}{O}{N})
+
+TYPE                ({T}{Y}{P}{E})
+VAR                 ({V}{A}{R})
+CONST               ({C}{O}{N}{S}{T})
+
+CLASS               ({C}{L}{A}{S}{S})
+PRIVATE             ({P}{R}{I}{V}{A}{T}{E})
+PUBLIC              ({P}{U}{B}{L}{I}{C})
+PUBLISHED           ({P}{U}{B}{L}{I}{S}{H}{E}{D})
+PROTECTED           ({P}{R}{O}{T}{E}{C}{T}{E}{D})
+RECORD              ({R}{E}{C}{O}{R}{D})
+
+OVERLOAD            ({O}{V}{E}{R}{L}{O}{A}{D})
+OVERRIDE            ({O}{V}{E}{R}{R}{I}{D}{E})
+INHERITED           ({I}{N}{H}{E}{R}{I}{T}{E}{D})
+
+INITIALIZATION      ({I}{N}{I}{T}{I}{A}{L}{I}{Z}{A}{T}{I}{O}{N})
+FINALZATION         ({F}{I}{N}{A}{L}{Z}{A}{T}{I}{O}{N})
 
 %option noyywrap
 
-%x Start
+%x Body
 
 %%
 
-<Start>{
-    {WS}{IDENTIFIER}
+<Body>\n    {
+    yyextra->yyLineNr += 1;
+    std::cerr << "[3] newline       : #10"      <<
+    std::endl;
+}
+<Body>{WS}* {
+    std::cerr << "[1] whitespace    : #32"      <<
+    std::endl;
+}
+<Body>{IDENTIFIER} {
+    std::cerr << "[2] ident         : "         << yytext <<
+    std::endl;
+}
+<Body>":=" {
+    std::cerr << "[6] assign        : := "      << yytext <<
+    std::endl;
+}
+<Body>"<>" {
+    std::cerr << "[7] not equal     : <> "      << yytext <<
+    std::endl;
+}
+<Body>{NIL} {
+    std::cerr << "[8] null ptr nil  : nil "     << yytext <<
+    std::endl;
+}
+<Body>[\+\-\*\/] {
+    std::cerr << "[4] math symbol   : "         << yytext <<
+    std::endl;
+}
+<Body>[\;\.] {
+    std::cerr << "[5] end sign      : "         << yytext <<
+    std::endl;
+}
+<Body>{BEGIN} {
+    std::cerr << "[10] keyword      : begin"    <<
+    std::endl;
+}
+<Body>{RESULT} {
+    std::cerr << "[11] keyword      : result"   <<
+    std::endl;
+}
+<Body>{END} {
+    std::cerr << "[12] keyword      : end"      <<
+    std::endl;
+}
+<Body>{FOR} {
+    std::cerr << "[13] keyword      : for"      <<
+    std::endl;
+}
+<Body>{IF} {
+    std::cerr << "[14] keyword      : if"       <<
+    std::endl;
+}
+<Body>{ELSE} {
+    std::cerr << "[15] keyword      : else"     <<
+    std::endl;
+}
+<Body>{THEN} {
+    std::cerr << "[16] keyword      : then"     <<
+    std::endl;
 }
 
 %%
@@ -212,9 +348,10 @@ static void parseMain(yyscan_t yyscanner, const QCString &fileName,const char *f
   yyextra->checkDupEntry = false;
   yyextra->firstPass     = true;
   //setContext();
-  msg("Parsing file {}...\n",yyextra->fileName);
-
-  BEGIN( Start );
+  
+  std::cerr << "lex file {" << yyextra->fileName << "}..." <<
+  std::endl;
+  BEGIN( Body );
 
   passcannerYYlex(yyscanner);
   yyextra->lexInit = TRUE;
@@ -246,8 +383,10 @@ static void parsePrototype(yyscan_t yyscanner,const QCString &text)
   yyextra->inputString = text.data();
   yyextra->inputPosition = 0;
   passcannerYYrestart( nullptr, yyscanner );
-  
-  BEGIN( Start );
+
+  std::cerr << "lex proto file {" << yyextra->fileName << "}..." <<
+  std::endl;
+  BEGIN( Body );
   
   passcannerYYlex(yyscanner);
   yyextra->lexInit=TRUE;
