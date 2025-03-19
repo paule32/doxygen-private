@@ -175,9 +175,9 @@ set(JAVA_CC_EXTRA_FLAGS "-DJAVACC_CHAR_TYPE=\"unsigned char\"")
 set(CMAKE_CXX_FLAGS       "${CMAKE_CXX_FLAGS}       ${JAVA_CC_EXTRA_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${JAVA_CC_EXTRA_FLAGS}")
 
-if(POLICY CMP0063)
-  cmake_policy(SET CMP0063 NEW)
-endif()
+#if(POLICY CMP0063)
+#  cmake_policy(SET CMP0063 NEW)
+#endif()
 
 # when using mutrace comment the next 3 lines and uncomment the last 2
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)

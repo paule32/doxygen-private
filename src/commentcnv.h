@@ -2,7 +2,7 @@
  *
  *
  *
- * Copyright (C) 1997-2015 by Dimitri van Heesch.
+ * Copyright (C) 1997-2025 by Dimitri van Heesch.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License is hereby
@@ -19,6 +19,11 @@
 #define COMMENTCNV_H
 
 #include <string>
+
+// paule32: locale
+#ifdef libintl_sprintf
+#undef libintl_sprintf
+#endif
 
 /** @file
  *  @brief First pass comment processing.

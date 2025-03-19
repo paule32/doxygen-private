@@ -1423,9 +1423,9 @@ static void replaceCommentMarker(yyscan_t yyscanner,std::string_view s)
 {
   struct yyguts_t *yyg = (struct yyguts_t*)yyscanner;
   if (s.empty()) return;
-  size_t p   = 0;
-  size_t len = s.length();
-  char c = 0;
+  int p   = 0;
+  int len = s.length();
+  char c  = '\0';
   // copy leading blanks
   while (p<len && (c=s[p]) && (c==' ' || c=='\t' || c=='\n'))
   {
@@ -1463,7 +1463,7 @@ static void replaceCommentMarker(yyscan_t yyscanner,std::string_view s)
   }
   // copy comment line to output
   yyextra->outBuf+=s.substr(p);
-  yyextra->col+=s.substr(p).length();
+  yyextra->col += s.substr(p).length();
 }
 
 static inline int computeIndent(const char *s)
@@ -1919,6 +1919,7 @@ static void replaceComment(yyscan_t yyscanner,int offset)
  */
 void convertCppComments(const std::string &inBuf,std::string &outBuf,const std::string &fn)
 {
+
   QCString fileName { fn };
   yyscan_t yyscanner;
   commentcnvYY_state extra(&inBuf,outBuf);

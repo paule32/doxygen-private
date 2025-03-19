@@ -224,7 +224,8 @@ void initWarningFormat()
   if (g_warnlogFile.isEmpty() && g_warnBehavior == WARN_AS_ERROR_t::FAIL_ON_WARNINGS_PRINT)
   {
     uint32_t pid = Portable::pid();
-    g_warnlogFile.sprintf("doxygen_warnings_temp_%d.tmp",pid);
+    // paule32: todo !!!
+    //g_warnlogFile.sprintf("doxygen_warnings_temp_%d.tmp",pid);
     g_warnlogTemp = true;
   }
 

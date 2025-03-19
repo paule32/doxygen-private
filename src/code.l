@@ -46,6 +46,8 @@ typedef yyguts_t *yyscan_t;
 #include <assert.h>
 #include <ctype.h>
 
+#include "doxygen.h"
+
 #include "code.h"
 #include "entry.h"
 #include "doxygen.h"
